@@ -55,8 +55,14 @@
             <input type="text" v-model="minHeight">
           </p>
           <p>
-            <span>转PNG阈值：</span>
-            <input type="number" v-model="convertSize">
+            <span>png转jpeg阈值：</span>
+            <select v-model="convertSize">
+              <option :value="1024000">1mb</option>
+              <option :value="2048000">2mb</option>
+              <option :value="5120000">5mb</option>
+              <option :value="10240000">10mb</option>
+              <option :value="Infinity">Infinity</option>
+            </select>
           </p>
           <p>
             <span>宽松模式：</span>
