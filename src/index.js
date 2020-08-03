@@ -5,7 +5,7 @@ var util = {};
 var defaultOptions = {
   file: null,
   quality: 0.8,
-  convertSize: 2000000,
+  convertSize: 2048000,
   loose: true
 };
 
