@@ -1,6 +1,6 @@
 {
   "name": "js-image-compressor",
-  "version": "1.0.0",
+  "version": "1.1.4",
   "description": "A simple image compressor of javascript",
   "main": "index.js",
   "scripts": {
