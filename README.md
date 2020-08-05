@@ -140,4 +140,4 @@ new ImageCompressor(options);
 
 下图归纳了 `js-image-compressor` 插件从用户图片通过 `input` 的 `file` 本地上传到对图片压缩的详细过程，同时暴露出这些工具方法供用户使用。
 
-![js-image-compressor](./src/js-image-compressor.jpg)
+![js-image-compressor](./relation-chart.jpg)
