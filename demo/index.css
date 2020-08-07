@@ -19,6 +19,7 @@
 .origin img,
 .output img {
   max-width: 100%;
+  max-height: 300px;
   vertical-align: middle;
 }
 
