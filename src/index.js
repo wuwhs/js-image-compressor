@@ -1,3 +1,4 @@
+var EXIF = require('exif-js');
 var WIN = window;
 var REGEXP_IMAGE_TYPE = /^image\//;
 var REGEXP_EXTENSION = /\.\w+$/;
@@ -73,7 +74,11 @@ _proto.init = function () {
   }
 
   util.file2Image(file, function (img) {
-
+    console.log('exif-js: ', EXIF)
+    EXIF.getData(img, function () {
+      var Orientation = EXIF.getTag(this, 'Orientation');
+      console.log('Orientation: ', Orientation);
+    })
     if (isFunc(_this.beforeCompress)) {
       _this.image = img;
       file.width = img.naturalWidth;
@@ -155,6 +160,58 @@ _proto.getExpectedEdge = function () {
     width: width,
     height: height
   }
+}
+
+/**
+ * 逆向转化Exif获取到图片的方向信息
+ * @param {Number} orientation 方向标识
+ * @returns {Object} 转化结果
+ */
+_proto.parseOrientation = function (orientation) {
+  var rotate = 0;
+  var scaleX = 1;
+  var scaleY = 1;
+
+  switch (orientation) {
+    // 水平翻转
+    case 2:
+      scaleX = -1;
+      break;
+    // 向左旋转180°
+    case 3:
+      rotate = -180;
+      break;
+    // 垂直翻转
+    case 4:
+      scaleY = -1;
+      break;
+    // 垂直翻转并且向右旋转90°
+    case 5:
+      rotate = 90;
+      scaleY = -1;
+      break;
+    // 向右旋转90°
+    case 6:
+      rotate = 90;
+      break;
+    // 水平翻转并且向右旋转90°
+    case 7:
+      rotate = 90;
+      scaleX = -1;
+      break;
+    // 向左旋转90°
+    case 8:
+      rotate = -90;
+      break;
+    default:
+      break;
+  }
+
+  return {
+    rotate: rotate,
+    scaleX: scaleX,
+    scaleY: scaleY
+  };
 }
 
 /**
