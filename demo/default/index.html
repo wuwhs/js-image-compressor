@@ -72,6 +72,13 @@
             </select>
           </p>
           <p>
+            <span>矫正jpeg方向：</span>
+            <select v-model="redressOrientation">
+              <option :value="true">是</option>
+              <option :value="false">否</option>
+            </select>
+          </p>
+          <p>
             <span>压缩率：</span>
             <input type="number" max="1" min="0.05" step="0.05" v-model="quality">
           </p>

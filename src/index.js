@@ -7,7 +7,8 @@ var defaultOptions = {
   file: null,
   quality: 0.8,
   convertSize: 2048000,
-  loose: true
+  loose: true,
+  redressOrientation: true
 };
 
 /**
@@ -49,6 +50,7 @@ function ImageCompressor(options) {
   this.options = options;
   this.file = options.file;
   this.image = null;
+  this.ParsedOrientationInfo = null;
   this.init();
 }
 
@@ -74,11 +76,6 @@ _proto.init = function () {
   }
 
   util.file2Image(file, function (img) {
-    console.log('exif-js: ', EXIF)
-    EXIF.getData(img, function () {
-      var Orientation = EXIF.getTag(this, 'Orientation');
-      console.log('Orientation: ', Orientation);
-    })
     if (isFunc(_this.beforeCompress)) {
       _this.image = img;
       file.width = img.naturalWidth;
@@ -86,16 +83,39 @@ _proto.init = function () {
       _this.beforeCompress(file);
     }
 
-    var edge = _this.getExpectedEdge();
-
-    var canvas = util.image2Canvas(img, edge.width, edge.height, _this.beforeDraw.bind(_this), _this.afterDraw.bind(_this));
-
-    util.canvas2Blob(canvas, function (blob) {
-      blob.width = canvas.width;
-      blob.height = canvas.height;
-      _this.success(blob);
-    }, options.quality, options.mimeType)
+    if (file.type === 'image/jpeg' && options.redressOrientation) {
+      _this.getParsedOrientationInfo(img, function (info) {
+        _this.parsedOrientationInfo = info;
+        _this.rendCanvas();
+      })
+    } else {
+      _this.parsedOrientationInfo = {
+        rotate: 0,
+        scaleX: 1,
+        scaleY: 1
+      };
+      _this.rendCanvas();
+    }
   }, _this.error)
+}
+
+_proto.rendCanvas = function () {
+  var _this = this;
+  var options = this.options;
+  var image = this.image;
+  var edge = this.getExpectedEdge();
+  var dWidth = edge.dWidth;
+  var dHeight = edge.dHeight;
+  var width = edge.width;
+  var height = edge.height;
+
+  var canvas = util.image2Canvas(image, dWidth, dHeight, _this.beforeDraw.bind(_this), _this.afterDraw.bind(_this), width, height);
+
+  util.canvas2Blob(canvas, function (blob) {
+    blob.width = canvas.width;
+    blob.height = canvas.height;
+    _this.success(blob);
+  }, options.quality, options.mimeType)
 }
 
 /**
@@ -112,9 +132,14 @@ _proto.beforeCompress = function () {
  */
 _proto.getExpectedEdge = function () {
   var image = this.image;
+  var parsedOrientationInfo = this.parsedOrientationInfo;
+  var rotate = parsedOrientationInfo.rotate;
   var options = this.options;
   var naturalWidth = image.naturalWidth;
   var naturalHeight = image.naturalHeight;
+  var temp;
+
+  var is90DegreesRotated = Math.abs(rotate) % 180 === 90;
   var aspectRatio = naturalWidth / naturalHeight;
   var maxWidth = Math.max(options.maxWidth, 0) || Infinity;
   var maxHeight = Math.max(options.maxHeight, 0) || Infinity;
@@ -122,6 +147,21 @@ _proto.getExpectedEdge = function () {
   var minHeight = Math.max(options.minHeight, 0) || 0;
   var width = Math.max(options.width, 0) || naturalWidth;
   var height = Math.max(options.height, 0) || naturalHeight;
+
+  // 重置原始宽高
+  if (is90DegreesRotated) {
+    temp = height;
+    height = width;
+    width = temp;
+
+    temp = maxHeight;
+    maxHeight = maxWidth;
+    maxWidth = temp;
+
+    temp = minHeight;
+    minHeight = minWidth;
+    minWidth = temp;
+  }
 
   if (maxWidth < Infinity && maxHeight < Infinity) {
     if (maxHeight * aspectRatio > maxWidth) {
@@ -156,10 +196,50 @@ _proto.getExpectedEdge = function () {
   width = Math.floor(Math.min(Math.max(width, minWidth), maxWidth));
   height = Math.floor(Math.min(Math.max(height, minHeight), maxHeight));
 
+  var dWidth = width;
+  var dHeight = height;
+
+  if (is90DegreesRotated) {
+    temp = width;
+    width = height;
+    height = temp;
+  }
+
   return {
+    dWidth: dWidth,
+    dHeight: dHeight,
     width: width,
     height: height
   }
+}
+
+/**
+ * 获取转化后的方向信息
+ * @param {File} img 图片对象
+ * @param {Function} callback 回调函数
+ */
+_proto.getParsedOrientationInfo = function (img, callback) {
+  var _this = this;
+
+  this.getOrientation(img, function (orientation) {
+    if (isFunc(callback)) {
+      callback(_this.parseOrientation(orientation));
+    }
+  })
+}
+
+/**
+ * 获取方向
+ * @param {File} img 图片对象
+ * @param {Function} callback 回调函数
+ */
+_proto.getOrientation = function (img, callback) {
+  EXIF.getData(img, function () {
+    var orientation = EXIF.getTag(this, 'Orientation');
+    if (isFunc(callback)) {
+      callback(orientation);
+    }
+  })
 }
 
 /**
@@ -220,9 +300,15 @@ _proto.parseOrientation = function (orientation) {
  * @param {HTMLCanvasElement} canvas Canvas 对象
  */
 _proto.beforeDraw = function (ctx, canvas) {
+  var parsedOrientationInfo = this.parsedOrientationInfo;
+  var rotate = parsedOrientationInfo.rotate;
+  var scaleX = parsedOrientationInfo.scaleX;
+  var scaleY = parsedOrientationInfo.scaleY;
   var file = this.file;
   var options = this.options;
   var fillStyle = 'transparent';
+  var width = canvas.width;
+  var height = canvas.height;
 
   // `png` 格式图片大小超过 `convertSize`, 转化成 `jpeg` 格式
   if (file.size > options.convertSize && options.mimeType === 'image/png') {
@@ -232,12 +318,29 @@ _proto.beforeDraw = function (ctx, canvas) {
 
   // 覆盖默认的黑色填充色
   ctx.fillStyle = fillStyle;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, width, height);
 
   // 用户自定义画布样式
   if (isFunc(options.beforeDraw)) {
     options.beforeDraw.call(this, ctx, canvas);
   }
+
+  ctx.save();
+
+  switch (rotate) {
+    case 90:
+      ctx.translate(width, 0);
+      break;
+    case -90:
+      ctx.translate(0, height);
+      break;
+    case -180:
+      ctx.translate(width, height);
+      break;
+  }
+
+  ctx.rotate((rotate * Math.PI) / 180);
+  ctx.scale(scaleX, scaleY);
 }
 
 /**
@@ -396,16 +499,16 @@ util.url2Image = function (url, callback, error) {
  * @param {Function} beforeDraw 在图片绘画之后的回调函数
  * @return {HTMLCanvasElement} `canvas` 对象
  */
-util.image2Canvas = function (image, destWidth, destHeight, beforeDraw, afterDraw) {
+util.image2Canvas = function (image, dWidth, dHeight, beforeDraw, afterDraw, width, height) {
   var canvas = document.createElement('canvas');
   var ctx = canvas.getContext('2d');
-  canvas.width = destWidth || image.naturalWidth;
-  canvas.height = destHeight || image.naturalHeight;
+  canvas.width = width || image.naturalWidth;
+  canvas.height = height || image.naturalHeight;
   if (isFunc(beforeDraw)) {
     beforeDraw(ctx, canvas);
   }
   ctx.save();
-  ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+  ctx.drawImage(image, 0, 0, dWidth, dHeight);
   ctx.restore();
   if (isFunc(afterDraw)) {
     afterDraw(ctx, canvas);

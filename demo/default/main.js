@@ -27,7 +27,8 @@ new Vue({
       minWidth: 0,
       minHeight: 0,
       convertSize: Infinity,
-      loose: true
+      loose: true,
+      redressOrientation: true
     }
   },
 
@@ -100,6 +101,7 @@ new Vue({
         minHeight: this.minHeight,
         convertSize: this.convertSize,
         loose: this.loose,
+        redressOrientation: this.redressOrientation,
 
         // 压缩前回调
         beforeCompress: function (result) {
