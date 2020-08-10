@@ -62,7 +62,10 @@ new ImageCompressor(options);
 
 ### 标准使用
 
-在标准使用中，我们可以根据自身需求自定义配置压缩比（`quality`）、输出图片类型（`mimeType`）、宽（`width`）、高（`height`）、最大宽（`maxWidth`）、最大高（`maxHeight`）、最小宽（`minWidth`）、最大高（`minHeight`）、png转jpeg阈值（`convertSize`）和是否宽松模式（`loose`）。其中，是否宽松模式（`loose`）的意思是控制当压缩的图片 `size` 大于源图片，输出源图片，否则输出压缩后图片，默认是 `true`。
+在标准使用中，我们可以根据自身需求自定义配置压缩比（`quality`）、输出图片类型（`mimeType`）、宽（`width`）、高（`height`）、最大宽（`maxWidth`）、最大高（`maxHeight`）、最小宽（`minWidth`）、最大高（`minHeight`）、png转jpeg阈值（`convertSize`）、是否矫正jpeg方向（`redressOrientation`）和是否宽松模式（`loose`）。
+
+- 是否矫正jpeg方向（`redressOrientation`），`jpeg` 格式图片在某些iOS浏览器会按其方向呈现图像，这个选项可以控制恢复初始方向，默认为 `true`；
+- 是否宽松模式（`loose`）、的意思是控制当压缩的图片 `size` 大于源图片，输出源图片，否则输出压缩后图片，默认是 `true`。
 
 以下是标准配置：
 
@@ -79,6 +82,7 @@ var options = {
   minHeight: 500,
   convertSize: Infinity,
   loose: true,
+  redressOrientation: true,
 
   // 压缩前回调
   beforeCompress: function (result) {
