@@ -99,6 +99,9 @@ _proto.init = function () {
   }, _this.error)
 }
 
+/**
+ * `Canvas` 渲染模块
+ */
 _proto.rendCanvas = function () {
   var _this = this;
   var options = this.options;
