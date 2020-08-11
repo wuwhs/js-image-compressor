@@ -106,7 +106,6 @@ new Vue({
         // 压缩前回调
         beforeCompress: function (result) {
           vm.btnText = '处理中...';
-          vm.imgName = result.name;
           vm.originImgWidth = result.width;
           vm.originImgHeight = result.height;
           vm.originSize = result.size;
@@ -122,6 +121,7 @@ new Vue({
         // 压缩成功回调
         success: function (result) {
           vm.btnText = BTN_OK;
+          vm.imgName = result.name;
           console.log('result: ', result)
           console.log('压缩之后图片尺寸大小: ', result.size);
           console.log('mime 类型: ', result.type);
