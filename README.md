@@ -1,80 +1,86 @@
-## 说明
+## Introduction
 
-`js-image-compressor` 是一个实现轻量级图片压缩的 `javascript` 库，压缩后仅有 `5kb`，在前端页面即可实现对图片的压缩。在提供基本图片压缩功能同时，还暴露出图片处理相关公用方法，以及进行边界情况处理：
+`js-image-compressor` is a `javascript` library that implements lightweight image compression. After compression, it is only `5kb`, and the image can be compressed on the front-end page. While providing basic image compression functions, it also exposes related public methods of image processing, as well as border case processing:
 
-- 可以对待转化图片大小设置一定的阈值，使得图片转化成 `png` 格式在不理想情况下不至于过大，同时大于这个阈值则可以自动转化成 `jpeg` 格式，实现更优压缩；
-- 可以限制输出图片宽高大小，从而防止意外情况发生，比如压缩运算过大使得浏览器奔溃；
-- 默认对 `png` 输出图片添加透明底色，其他格式设为白色，避免“黑屏”发生；
-- 提供一些图片处理的常用工具函数（`image2Canvas`、`canvas2Blob` 和 `canvas2DataUrl` 等），用户还可以自定义图片输出的样式特征（比如可以灰度处理、加水印）。
+-A certain threshold can be set for the size of the converted image, so that the image converted to `png` format will not be too large under undesirable conditions, and at the same time larger than this threshold, it can be automatically converted to `jpeg` format for better compression;
+-You can limit the width and height of the output image to prevent accidents, such as excessive compression operations that cause the browser to crash;
+-By default, a transparent background color is added to the output image of `png`, and other formats are set to white to avoid "black screen";
+-Read the `EXIF` information of `jpeg` format pictures, and correct the picture orientation;
+-Provide some common tool functions for image processing (`image2Canvas`, `canvas2Blob` and `canvas2DataUrl`, etc.), and users can also customize the style features of image output (for example, grayscale processing, watermarking).
 
-## 使用
+Document language:
 
-### 安装引入
+-[English](./README.md)
+-[Chinese](./README-CN.md)
 
-你可以通过npm去安装依赖：
+## Use
+
+### Installation and introduction
+
+You can install dependencies through npm:
 
 ```js
 npm install js-image-compressor --save-dev
 ```
 
-也可以在下载后，在 `dist` 目录下找到 `image-compress.min.js` 文件在页面中通过 `script` 引入：
+You can also find the file `image-compress.min.js` in the `dist` directory after downloading and import it through `script` on the page:
 
 ```html
 <script src="../dist/image-compressor.js"></script>
 ```
 
-### 简单使用
+### Simple to use
 
-你可以只传入待压缩图片对象，其他参数都是非必须的，插件按照默认参数自动完成图片压缩处理。不过这样输出的压缩图片符合以下特征：
+You can only pass in the image object to be compressed, other parameters are optional, and the plug-in automatically completes the image compression processing according to the default parameters. However, the compressed image output in this way meets the following characteristics:
 
-- 默认按照 `0.8` 压缩率配置；
-- 输出图片宽/高维持源图片宽/高；
-- 一般的，输出图片格式保持源图片格式；
-- 当 `png` 图片的 `size` 大于 `2m` 时，默认转化成 `jpeg` 格式图片；
-- 给 `png` 图片填充透明色；
-- 当输出图片 `size` 大于源图片时，将源图片当作输出图片返回；
-- `jpeg` 格式图片，矫正翻转/旋转方向；
+-The default configuration is based on `0.8` compression ratio;
+-Output picture width/height maintains the source picture width/height;
+-Generally, the output image format keeps the original image format;
+-When the `size` of the `png` image is greater than `2m`, it will be converted into a `jpeg` format image by default;
+-Fill the `png` picture with a transparent color;
+-When the output picture `size` is larger than the source picture, the source picture will be returned as the output picture;
+-`jpeg` format picture, correct the flip/rotation direction;
 
-如果这些默认配置不能满足你的需求，可能需要其他参数配置。以下是一个简单使用配置：
+If these default configurations cannot meet your needs, other parameter configurations may be required. The following is a simple configuration:
 
 ```js
 var options = {
   file: file,
 
-  // 压缩前回调
+  // Callback before compression
   beforeCompress: function (result) {
-    console.log('压缩之前图片尺寸大小: ', result.size);
-    console.log('mime 类型: ', result.type);
+    console.log('Image size before compression:', result.size);
+    console.log('mime type:', result.type);
   },
 
-  // 压缩成功回调
+  // Compression success callback
   success: function (result) {
-    console.log('result: ', result)
-    console.log('压缩之后图片尺寸大小: ', result.size);
-    console.log('mime 类型: ', result.type);
-    console.log('实际压缩率： ', ((file.size - result.size) / file.size * 100).toFixed(2) + '%');
+    console.log('result:', result)
+    console.log('Image size after compression:', result.size);
+    console.log('mime type:', result.type);
+    console.log('Actual compression ratio:', ((file.size-result.size) / file.size * 100).toFixed(2) +'%');
   }
 };
 
 new ImageCompressor(options);
 ```
 
-其中，钩子函数 `beforeCompress` 发生在读取图片之后，创建画布之前；钩子函数 `success` 函数发生在压缩完成生成图片之后。它们回调参数 `result` 是整合来尺寸、图片类型和大小等相关信息的 `blob` 对象。
+Among them, the hook function `beforeCompress` occurs after the image is read and before the canvas is created; the hook function `success` function occurs after the compression is completed to generate the image. Their callback parameter `result` is a `blob` object that integrates relevant information such as size, picture type and size.
 
-### 标准使用
+### Standard use
 
-在标准使用中，我们可以根据自身需求自定义配置压缩比（`quality`）、输出图片类型（`mimeType`）、宽（`width`）、高（`height`）、最大宽（`maxWidth`）、最大高（`maxHeight`）、最小宽（`minWidth`）、最大高（`minHeight`）、png转jpeg阈值（`convertSize`）、是否矫正jpeg方向（`redressOrientation`）和是否宽松模式（`loose`）。
+In standard use, we can customize the compression ratio (`quality`), output image type (`mimeType`), width (`width`), height (`height`), and maximum width (`maxWidth`) according to our own needs. ), maximum height (`maxHeight`), minimum width (`minWidth`), maximum height (`minHeight`), png to jpeg threshold (`convertSize`), whether to correct the jpeg direction (`redressOrientation`) and whether the loose mode ( `loose`).
 
-- 是否矫正jpeg方向（`redressOrientation`），`jpeg` 格式图片在某些iOS浏览器会按其方向呈现图像，这个选项可以控制恢复初始方向，默认为 `true`；
-- 是否宽松模式（`loose`）、的意思是控制当压缩的图片 `size` 大于源图片，输出源图片，否则输出压缩后图片，默认是 `true`。
+-Whether to correct the jpeg orientation (`redressOrientation`), the `jpeg` format image will be presented according to its orientation in some iOS browsers, this option can control the restoration of the initial orientation, the default is `true`;
+-Whether it is loose mode (`loose`), which means to control when the compressed image `size` is larger than the source image, output the source image, otherwise output the compressed image, the default is `true`.
 
-以下是标准配置：
+The following is the standard configuration:
 
 ```js
 var options = {
   file: file,
   quality: 0.6,
-  mimeType: 'image/jpeg',
+  mimeType:'image/jpeg',
   maxWidth: 2000,
   maxHeight: 2000,
   width: 1000,
@@ -85,20 +91,20 @@ var options = {
   loose: true,
   redressOrientation: true,
 
-  // 压缩前回调
+  // Callback before compression
   beforeCompress: function (result) {
-    console.log('压缩之前图片尺寸大小: ', result.size);
-    console.log('mime 类型: ', result.type);
+    console.log('Image size before compression:', result.size);
+    console.log('mime type:', result.type);
   },
 
-  // 压缩成功回调
+  // Compression success callback
   success: function (result) {
-    console.log('压缩之后图片尺寸大小: ', result.size);
-    console.log('mime 类型: ', result.type);
-    console.log('实际压缩率： ', ((file.size - result.size) / file.size * 100).toFixed(2) + '%');
+    console.log('Image size after compression:', result.size);
+    console.log('mime type:', result.type);
+    console.log('Actual compression ratio:', ((file.size-result.size) / file.size * 100).toFixed(2) +'%');
   },
 
-  // 发生错误
+  // An error occurred
   error: function (msg) {
     console.error(msg);
   }
@@ -107,42 +113,43 @@ var options = {
 new ImageCompressor(options);
 ```
 
-`error` 钩子函数是图片压缩过程中错误回调，没有这个回调错误则会在插件中 `throw new Error(msg)` 形式抛出。
+The `error` hook function is an error callback during the image compression process. Without this callback error, it will be thrown in the form of `throw new Error(msg)` in the plugin.
 
-### 其他钩子函数
+### Other hook functions
 
-在压缩输出图片之前，我们还可以对画布进行一些自定义处理，融入元素。
+Before compressing the output image, we can also customize the canvas to incorporate elements.
 
-以下是对图片进行灰度和加水印处理：
+The following is the grayscale and watermark processing of the picture:
 
 ```js
 var options = {
   file: file,
 
-  // 图片绘画前
+  // Before picture painting
   beforeDraw: function (ctx) {
-    vm.btnText = '准备绘图...';
-    console.log('准备绘图...');
-    ctx.filter = 'grayscale(100%)';
+    vm.btnText ='Ready to draw...';
+    console.log('Ready to draw...');
+    ctx.filter ='grayscale(100%)';
   },
 
-  // 图片绘画后
+  // After the picture is painted
   afterDraw: function (ctx, canvas) {
-    vm.btnText = '绘图完成...';
-    console.log('绘图完成...');
-    ctx.fillStyle = '#fff';
-    ctx.font = (canvas.width * 0.1) + 'px microsoft yahei';
-    ctx.fillText(vm.watermarkText, 10, canvas.height - 20);
+    ctx.restore();
+    vm.btnText ='Drawing completed...';
+    console.log('Drawing completed...');
+    ctx.fillStyle ='#fff';
+    ctx.font = (canvas.width * 0.1) +'px microsoft yahei';
+    ctx.fillText(vm.watermarkText, 10, canvas.height-20);
   },
 };
 
 new ImageCompressor(options);
 ```
 
-`beforeDraw` 是在画布创建后，图片绘画前的钩子函数，`afterDraw` 是在图绘画后的钩子函数。
+`beforeDraw` is the hook function before the picture is drawn after the canvas is created, and `afterDraw` is the hook function after the picture is drawn.
 
-### 工具函数
+### Tool functions
 
-下图归纳了 `js-image-compressor` 插件从用户图片通过 `input` 的 `file` 本地上传到对图片压缩的详细过程，同时暴露出这些工具方法供用户使用。
+The following figure summarizes the detailed process of the `js-image-compressor` plug-in from uploading user pictures locally through the `file` of `input` to image compression, and at the same time exposes these tools and methods for users to use.
 
 ![js-image-compressor](./relation-chart.jpg)
