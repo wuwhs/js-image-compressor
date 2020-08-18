@@ -2,16 +2,16 @@
 
 `js-image-compressor` is a `javascript` library that implements lightweight image compression. After compression, it is only `5kb`, and the image can be compressed on the front-end page. While providing basic image compression functions, it also exposes related public methods of image processing, as well as border case processing:
 
--A certain threshold can be set for the size of the converted image, so that the image converted to `png` format will not be too large under undesirable conditions, and at the same time larger than this threshold, it can be automatically converted to `jpeg` format for better compression;
--You can limit the width and height of the output image to prevent accidents, such as excessive compression operations that cause the browser to crash;
--By default, a transparent background color is added to the output image of `png`, and other formats are set to white to avoid "black screen";
--Read the `EXIF` information of `jpeg` format pictures, and correct the picture orientation;
--Provide some common tool functions for image processing (`image2Canvas`, `canvas2Blob` and `canvas2DataUrl`, etc.), and users can also customize the style features of image output (for example, grayscale processing, watermarking).
+- A certain threshold can be set for the size of the converted image, so that the image converted to `png` format will not be too large under undesirable conditions, and at the same time larger than this threshold, it can be automatically converted to `jpeg` format for better compression;
+- You can limit the width and height of the output image to prevent accidents, such as excessive compression operations that cause the browser to crash;
+- By default, a transparent background color is added to the output image of `png`, and other formats are set to white to avoid "black screen";
+- Read the `EXIF` information of `jpeg` format pictures, and correct the picture orientation;
+- Provide some common tool functions for image processing (`image2Canvas`, `canvas2Blob` and `canvas2DataUrl`, etc.), and users can also customize the style features of image output (for example, grayscale processing, watermarking).
 
 Document language:
 
--[English](./README.md)
--[Chinese](./README-CN.md)
+- [English](./README.md)
+- [Chinese](./README-CN.md)
 
 ## Use
 
@@ -33,13 +33,13 @@ You can also find the file `image-compress.min.js` in the `dist` directory after
 
 You can only pass in the image object to be compressed, other parameters are optional, and the plug-in automatically completes the image compression processing according to the default parameters. However, the compressed image output in this way meets the following characteristics:
 
--The default configuration is based on `0.8` compression ratio;
--Output picture width/height maintains the source picture width/height;
--Generally, the output image format keeps the original image format;
--When the `size` of the `png` image is greater than `2m`, it will be converted into a `jpeg` format image by default;
--Fill the `png` picture with a transparent color;
--When the output picture `size` is larger than the source picture, the source picture will be returned as the output picture;
--`jpeg` format picture, correct the flip/rotation direction;
+- The default configuration is based on `0.8` compression ratio;
+- Output picture width/height maintains the source picture width/height;
+- Generally, the output image format keeps the original image format;
+- When the `size` of the `png` image is greater than `2m`, it will be converted into a `jpeg` format image by default;
+- Fill the `png` picture with a transparent color;
+- When the output picture `size` is larger than the source picture, the source picture will be returned as the output picture;
+- `jpeg` format picture, correct the flip/rotation direction;
 
 If these default configurations cannot meet your needs, other parameter configurations may be required. The following is a simple configuration:
 
@@ -71,8 +71,8 @@ Among them, the hook function `beforeCompress` occurs after the image is read an
 
 In standard use, we can customize the compression ratio (`quality`), output image type (`mimeType`), width (`width`), height (`height`), and maximum width (`maxWidth`) according to our own needs. ), maximum height (`maxHeight`), minimum width (`minWidth`), maximum height (`minHeight`), png to jpeg threshold (`convertSize`), whether to correct the jpeg direction (`redressOrientation`) and whether the loose mode ( `loose`).
 
--Whether to correct the jpeg orientation (`redressOrientation`), the `jpeg` format image will be presented according to its orientation in some iOS browsers, this option can control the restoration of the initial orientation, the default is `true`;
--Whether it is loose mode (`loose`), which means to control when the compressed image `size` is larger than the source image, output the source image, otherwise output the compressed image, the default is `true`.
+- Whether to correct the jpeg orientation (`redressOrientation`), the `jpeg` format image will be presented according to its orientation in some iOS browsers, this option can control the restoration of the initial orientation, the default is `true`;
+- Whether it is loose mode (`loose`), which means to control when the compressed image `size` is larger than the source image, output the source image, otherwise output the compressed image, the default is `true`.
 
 The following is the standard configuration:
 
