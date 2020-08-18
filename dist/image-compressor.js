@@ -217,8 +217,10 @@ _proto.rendCanvas = function () {
   var canvas = util.image2Canvas(image, dWidth, dHeight, _this.beforeDraw.bind(_this), _this.afterDraw.bind(_this), width, height);
 
   util.canvas2Blob(canvas, function (blob) {
-    blob.width = canvas.width;
-    blob.height = canvas.height;
+    if (blob) {
+      blob.width = canvas.width;
+      blob.height = canvas.height;
+    }
     _this.success(blob);
   }, options.quality, options.mimeType)
 }
@@ -242,9 +244,16 @@ _proto.getExpectedEdge = function () {
   var options = this.options;
   var naturalWidth = image.naturalWidth;
   var naturalHeight = image.naturalHeight;
-  var temp;
 
   var is90DegreesRotated = Math.abs(rotate) % 180 === 90;
+  var temp;
+
+  if (is90DegreesRotated) {
+    temp = naturalHeight;
+    naturalHeight = naturalWidth;
+    naturalWidth = temp;
+  }
+
   var aspectRatio = naturalWidth / naturalHeight;
   var maxWidth = Math.max(options.maxWidth, 0) || Infinity;
   var maxHeight = Math.max(options.maxHeight, 0) || Infinity;
@@ -252,21 +261,6 @@ _proto.getExpectedEdge = function () {
   var minHeight = Math.max(options.minHeight, 0) || 0;
   var width = Math.max(options.width, 0) || naturalWidth;
   var height = Math.max(options.height, 0) || naturalHeight;
-
-  // 重置原始宽高
-  if (is90DegreesRotated) {
-    temp = height;
-    height = width;
-    width = temp;
-
-    temp = maxHeight;
-    maxHeight = maxWidth;
-    maxWidth = temp;
-
-    temp = minHeight;
-    minHeight = minWidth;
-    minWidth = temp;
-  }
 
   if (maxWidth < Infinity && maxHeight < Infinity) {
     if (maxHeight * aspectRatio > maxWidth) {
@@ -305,9 +299,9 @@ _proto.getExpectedEdge = function () {
   var dHeight = height;
 
   if (is90DegreesRotated) {
-    temp = width;
-    width = height;
-    height = temp;
+    temp = dHeight;
+    dHeight = dWidth;
+    dWidth = temp;
   }
 
   return {
@@ -486,12 +480,13 @@ _proto.success = function (result) {
   var naturalHeight = image.naturalHeight;
   var naturalWidth = image.naturalWidth;
 
-  if (result) {
+  if (result && result.size) {
     // 在非宽松模式下，用户期待的输出宽高没有大于源图片的宽高情况下，输出文件大小大于源文件，返回源文件
     if (!options.loose && result.size > file.size && !(
       edge.width > naturalWidth
       || edge.height > naturalHeight
     )) {
+      console.warn('当前设置的是非宽松模式，压缩结果大于源图片，输出源图片');
       result = file;
     } else {
       const date = new Date();
@@ -510,6 +505,7 @@ _proto.success = function (result) {
     }
   } else {
     // 在某些情况下压缩后文件为 `null`，返回源文件
+    console.warn('图片压缩出了点意外，输出源图片');
     result = file;
   }
 
@@ -597,12 +593,14 @@ util.url2Image = function (url, callback, error) {
 
 /**
  * `Image` 转化成 `Canvas` 对象
- * @param {File} file `Image` 对象
- * @param {Number} destWidth 目标宽度
- * @param {Number} destHeight 目标高度
+ * @param {File} image `Image` 对象
+ * @param {Number} dWidth 目标宽度
+ * @param {Number} dHeight 目标高度
  * @param {Function} beforeDraw 在图片绘画之前的回调函数
- * @param {Function} beforeDraw 在图片绘画之后的回调函数
- * @return {HTMLCanvasElement} `canvas` 对象
+ * @param {Function} afterDraw 在图片绘画之后的回调函数
+ * @param {Number} width 宽
+ * @param {Number} height 高
+ * @return {HTMLCanvasElement} `Canvas` 对象
  */
 util.image2Canvas = function (image, dWidth, dHeight, beforeDraw, afterDraw, width, height) {
   var canvas = document.createElement('canvas');
