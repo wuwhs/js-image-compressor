@@ -102,6 +102,7 @@ new Vue({
 
         // 图片绘画后
         afterDraw: function (ctx, canvas) {
+          ctx.restore();
           vm.btnText = '绘图完成...';
           console.log('绘图完成...');
           ctx.fillStyle = '#fff';
