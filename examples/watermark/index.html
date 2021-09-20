@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>watermark demo</title>
+    <link rel="stylesheet" href="../index.css" />
+  </head>
+
+  <body>
+    <div id="app">
+      <div class="row">
+        <div class="column upload">
+          <div
+            class="drop-content"
+            @drop="dropFile"
+            @dragenter="dragFileEnter"
+            @dragover="drageFileOver"
+          >
+            <input
+              id="file-elem"
+              type="file"
+              accept="image/*"
+              @change="inputChange"
+            />
+            <span>拖入文件或</span><label for="file-elem">点击选择文件</label>
+          </div>
+        </div>
+        <div class="column">
+          <div>
+            <h3>设置参数</h3>
+            <p>
+              <span>压缩率：</span>
+              <input
+                type="number"
+                max="1"
+                min="0.05"
+                step="0.05"
+                v-model="quality"
+              />
+            </p>
+            <p>
+              <span>水印：</span>
+              <input type="text" v-model="watermarkText" />
+            </p>
+            <p>
+              <button @click="submit">{{btnText}}</button>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="column origin">
+          <img :src="originImgUrl" />
+        </div>
+        <div class="column">
+          <h3>源图片信息</h3>
+          <div>
+            <span>mime类型：{{originMimeType}}</span>
+          </div>
+          <div>
+            <span>尺寸：{{originImgWidth}} x {{originImgHeight}}</span>
+          </div>
+          <div>
+            <span>大小：{{originSize}}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="column output">
+          <img :src="outputImgUrl" />
+        </div>
+        <div class="column">
+          <h3>压缩图片信息</h3>
+          <div>
+            <span>mime类型：{{outputMimeType}}</span>
+          </div>
+          <div>
+            <span>尺寸：{{outputImgWidth}} x {{outputImgHeight}}</span>
+          </div>
+          <div>
+            <span>大小：{{outputSize}}</span>
+          </div>
+          <div>
+            <span>实际压缩率：{{compressRatio}}</span>
+          </div>
+          <div>
+            <a :href="outputImgUrl" :download="imgName">下载</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="../vue.min.js"></script>
+    <script src="../../dist/image-compressor.js"></script>
+    <script src="./main.js"></script>
+  </body>
+</html>

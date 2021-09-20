@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>js-image-compressor</title>
+    <link rel="stylesheet" href="../index.css" />
+  </head>
+
+  <body>
+    <div id="app">
+      <div class="row">
+        <div class="column upload">
+          <div
+            class="drop-content"
+            @drop="dropFile"
+            @dragenter="dragFileEnter"
+            @dragover="drageFileOver"
+          >
+            <input
+              id="file-elem"
+              type="file"
+              accept="image/*"
+              @change="inputChange"
+            />
+            <span>拖入文件或</span><label for="file-elem">点击选择文件</label>
+          </div>
+        </div>
+        <div class="column">
+          <div>
+            <h3>设置参数</h3>
+            <p>
+              <span>mime 类型：</span>
+              <select v-model="mimeType">
+                <option value="auto">auto</option>
+                <option value="image/png">image/png</option>
+                <option value="image/jpeg">image/jpeg</option>
+                <option value="image/webp">image/webp</option>
+                <option value="image/gif">image/gif</option>
+              </select>
+            </p>
+            <p>
+              <span>maxWidth：</span>
+              <input type="text" v-model="maxWidth" />
+            </p>
+            <p>
+              <span>maxHeight：</span>
+              <input type="text" v-model="maxHeight" />
+            </p>
+            <p>
+              <span>width：</span>
+              <input type="text" v-model="width" />
+            </p>
+            <p>
+              <span>height：</span>
+              <input type="text" v-model="height" />
+            </p>
+            <p>
+              <span>minWidth：</span>
+              <input type="text" v-model="minWidth" />
+            </p>
+            <p>
+              <span>minHeigth：</span>
+              <input type="text" v-model="minHeight" />
+            </p>
+            <p>
+              <span>png转jpeg阈值：</span>
+              <select v-model="convertSize">
+                <option :value="1024000">1mb</option>
+                <option :value="2048000">2mb</option>
+                <option :value="5120000">5mb</option>
+                <option :value="10240000">10mb</option>
+                <option :value="Infinity">Infinity</option>
+              </select>
+            </p>
+            <p>
+              <span>宽松模式：</span>
+              <select v-model="loose">
+                <option :value="true">是</option>
+                <option :value="false">否</option>
+              </select>
+            </p>
+            <p>
+              <span>矫正jpeg方向：</span>
+              <select v-model="redressOrientation">
+                <option :value="true">是</option>
+                <option :value="false">否</option>
+              </select>
+            </p>
+            <p>
+              <span>压缩率：</span>
+              <input
+                type="number"
+                max="1"
+                min="0.05"
+                step="0.05"
+                v-model="quality"
+              />
+            </p>
+            <p>
+              <button @click="submit">{{btnText}}</button>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="column origin">
+          <img :src="originImgUrl" />
+        </div>
+        <div class="column">
+          <h3>源图片信息</h3>
+          <div>
+            <span>mime类型：{{originMimeType}}</span>
+          </div>
+          <div>
+            <span>尺寸：{{originImgWidth}} x {{originImgHeight}}</span>
+          </div>
+          <div>
+            <span>大小：{{originSize}}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="column output">
+          <img :src="outputImgUrl" />
+        </div>
+        <div class="column">
+          <h3>压缩图片信息</h3>
+          <div>
+            <span>mime类型：{{outputMimeType}}</span>
+          </div>
+          <div>
+            <span>尺寸：{{outputImgWidth}} x {{outputImgHeight}}</span>
+          </div>
+          <div>
+            <span>大小：{{outputSize}}</span>
+          </div>
+          <div>
+            <span>实际压缩率：{{compressRatio}}</span>
+          </div>
+          <div>
+            <a :href="outputImgUrl" :download="imgName">下载</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="../vue.min.js"></script>
+    <script src="../../dist/image-compressor.js"></script>
+    <script src="./main.js"></script>
+  </body>
+</html>
