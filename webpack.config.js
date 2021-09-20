@@ -12,14 +12,14 @@ module.exports = {
     filename: '[name].js',
     library: 'ImageCompressor',
     libraryExport: 'default',
-    libraryTarget: 'umd'
+    libraryTarget: 'umd',
   },
   optimization: {
     minimize: true,
     minimizer: [
       new TerserWebpackPlugin({
         include: /\.min\./,
-      })
-    ]
-  }
+      }),
+    ],
+  },
 }
