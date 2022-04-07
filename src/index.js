@@ -98,7 +98,7 @@ _proto.init = function () {
         _this.rendCanvas()
       }
     },
-    _this.error
+    _this.error.bind(_this)
   )
 }
 
