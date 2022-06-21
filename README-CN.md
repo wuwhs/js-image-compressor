@@ -20,7 +20,7 @@
 你可以通过npm去安装依赖：
 
 ```js
-npm install js-image-compressor --save-dev
+npm install js-image-compressor
 ```
 
 也可以在下载后，在 `dist` 目录下找到 `image-compress.min.js` 文件在页面中通过 `script` 引入：

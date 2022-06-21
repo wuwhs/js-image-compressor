@@ -20,7 +20,7 @@ Document language:
 You can install dependencies through npm:
 
 ```js
-npm install js-image-compressor --save-dev
+npm install js-image-compressor
 ```
 
 You can also find the file `image-compress.min.js` in the `dist` directory after downloading and import it through `script` on the page:
