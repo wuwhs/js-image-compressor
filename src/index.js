@@ -98,7 +98,8 @@ _proto.init = function () {
         _this.rendCanvas()
       }
     },
-    _this.error
+    // hongnny 处理this丢失
+    _this.error.bind(this)
   )
 }
 
